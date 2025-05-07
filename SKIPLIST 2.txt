@@ -1,0 +1,85 @@
+import random
+
+class Node:
+    def __init__(self, value, level):
+        self.value = value
+        self.forward = [None] * (level + 1)
+
+class SkipList:
+    def __init__(self, max_level, p=0.5):
+        self.max_level = max_level
+        self.p = p
+        self.header = Node(float('-inf'), max_level)
+        self.level = 0
+
+    def random_level(self):
+        lvl = 0
+        while random.random() < self.p and lvl < self.max_level:
+            lvl += 1
+        return lvl
+
+    def insert(self, value):
+        update = [None] * (self.max_level + 1)
+        current = self.header
+
+        for i in range(self.level, -1, -1):
+            while current.forward[i] and current.forward[i].value < value:
+                current = current.forward[i]
+            update[i] = current
+
+        rlevel = self.random_level()
+        if rlevel > self.level:
+            for i in range(self.level + 1, rlevel + 1):
+                update[i] = self.header
+            self.level = rlevel
+
+        new_node = Node(value, rlevel)
+        for i in range(rlevel + 1):
+            new_node.forward[i] = update[i].forward[i]
+            update[i].forward[i] = new_node
+
+    def find_closest(self, search_value):
+        current = self.header
+        closest = None
+        min_diff = float('inf')
+
+        for i in range(self.level, -1, -1):
+            while current.forward[i] and current.forward[i].value < search_value:
+                current = current.forward[i]
+
+        if current != self.header and current.value != search_value:
+            diff = abs(current.value - search_value)
+            if diff < min_diff:
+                min_diff = diff
+                closest = current.value
+
+        if current.forward[0] and current.forward[0].value != search_value:
+            diff = abs(current.forward[0].value - search_value)
+            if diff < min_diff:
+                closest = current.forward[0].value
+
+        return closest
+
+    def display(self):
+        for i in range(self.level, -1, -1):
+            print(f"Level {i}:", end=" ")
+            node = self.header.forward[i]
+            while node:
+                print(node.value, end=" -> ")
+                node = node.forward[i]
+            print("None")
+
+# === Driver code ===
+skiplist = SkipList(max_level=4)
+elements = [3, 6, 7, 9, 12, 19, 17, 26, 21, 25]
+
+for el in elements:
+    skiplist.insert(el)
+
+print("Skip List Structure:")
+skiplist.display()
+
+print("\nFind closest elements (excluding exact matches):")
+for target in [8, 20, 15]:
+    closest = skiplist.find_closest(target)
+    print(f"Closest to {target}: {closest}")
