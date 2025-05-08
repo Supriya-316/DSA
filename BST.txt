@@ -1,0 +1,198 @@
+#include <iostream>
+using namespace std;
+
+struct node {
+    int data;
+    node *L;
+    node *R;
+};
+
+class bst {
+    node *root;
+    int count;
+
+public:
+    bst() {
+        root = NULL;
+        count = 0;
+    }
+
+    void create();           // For initial element insertion
+    void insert(node*, node*);
+    void disin(node*);
+    void dispre(node*);
+    void dispost(node*);
+    void search(node*);
+    int height(node*);
+    void mirror(node*);
+    void min(node*);
+    node* getRoot() { return root; }
+};
+
+// Insert elements manually when the program starts
+void bst::create() {
+    int num_elements;
+    cout << "Enter the number of elements you want to insert into the BST: ";
+    cin >> num_elements;
+    for (int i = 0; i < num_elements; i++) {
+        node* temp = new node;
+        cout << "Enter data for node " << (i + 1) << ": ";
+        cin >> temp->data;
+        temp->L = NULL;
+        temp->R = NULL;
+        if (root == NULL) {
+            root = temp;
+        } else {
+            insert(root, temp);
+        }
+        count++;
+    }
+    cout << "Total number of nodes: " << count << endl;
+}
+
+void bst::insert(node* root, node* temp) {
+    if (temp->data > root->data) {
+        if (root->R == NULL) {
+            root->R = temp;
+        } else {
+            insert(root->R, temp);
+        }
+    } else {
+        if (root->L == NULL) {
+            root->L = temp;
+        } else {
+            insert(root->L, temp);
+        }
+    }
+}
+
+void bst::disin(node* root) {
+    if (root != NULL) {
+        disin(root->L);
+        cout << root->data << "\t";
+        disin(root->R);
+    }
+}
+
+void bst::dispre(node* root) {
+    if (root != NULL) {
+        cout << root->data << "\t";
+        dispre(root->L);
+        dispre(root->R);
+    }
+}
+
+void bst::dispost(node* root) {
+    if (root != NULL) {
+        dispost(root->L);
+        dispost(root->R);
+        cout << root->data << "\t";
+    }
+}
+
+void bst::search(node* root) {
+    int flag = 0, key;
+    cout << "\nEnter your key: ";
+    cin >> key;
+    node* temp = root;
+    while (temp != NULL) {
+        if (key == temp->data) {
+            cout << "KEY FOUND\n";
+            flag = 1;
+            break;
+        }
+        if (key > temp->data) {
+            temp = temp->R;
+        } else {
+            temp = temp->L;
+        }
+    }
+    if (flag == 0) {
+        cout << "KEY NOT FOUND\n";
+    }
+}
+
+int bst::height(node* root) {
+    if (root == NULL)
+        return 0;
+    int hl = height(root->L);
+    int hr = height(root->R);
+    return max(hl, hr) + 1;
+}
+
+void bst::min(node* root) {
+    node* temp = root;
+    while (temp && temp->L != NULL) {
+        temp = temp->L;
+    }
+    if (temp)
+        cout << temp->data;
+    else
+        cout << "Tree is empty.";
+}
+
+void bst::mirror(node* root) {
+    if (root != NULL) {
+        mirror(root->L);
+        mirror(root->R);
+        node* temp = root->L;
+        root->L = root->R;
+        root->R = temp;
+    }
+}
+
+int main() {
+    bst t;
+
+    // Prompt user to enter elements at the start
+    cout << "Welcome to Binary Search Tree!\n";
+    t.create();  // <<<< User enters initial elements here
+
+    int ch;
+    char ans;
+    do {
+        cout << "\n1) Height of tree\n2) Minimum value\n3) Mirror tree"
+             << "\n4) Search\n5) Inorder\n6) Preorder\n7) Postorder\nEnter choice: ";
+        cin >> ch;
+        switch (ch) {
+        case 1:
+            cout << "\nHeight of tree: " << t.height(t.getRoot()) << endl;
+            break;
+        case 2:
+            cout << "\nMinimum element: ";
+            t.min(t.getRoot());
+            cout << endl;
+            break;
+        case 3:
+            t.mirror(t.getRoot());
+            cout << "\nMirror (Inorder traversal): ";
+            t.disin(t.getRoot());
+            cout << endl;
+            break;
+        case 4:
+            t.search(t.getRoot());
+            break;
+        case 5:
+            cout << "\n*INORDER*\n";
+            t.disin(t.getRoot());
+            cout << endl;
+            break;
+        case 6:
+            cout << "\n*PREORDER*\n";
+            t.dispre(t.getRoot());
+            cout << endl;
+            break;
+        case 7:
+            cout << "\n*POSTORDER*\n";
+            t.dispost(t.getRoot());
+            cout << endl;
+            break;
+        default:
+            cout << "Invalid choice!";
+        }
+        cout << "\nDo you want to continue (y/n)? ";
+        cin >> ans;
+    } while (ans == 'y');
+
+    return 0;
+}

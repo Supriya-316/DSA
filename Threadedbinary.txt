@@ -1,0 +1,103 @@
+#include<iostream>
+using namespace std;
+
+struct Node{
+    int value;
+    Node* left;
+    Node* right;
+    bool rightThread;
+
+    Node(int v){
+        value = v;
+        left = right = NULL;
+        rightThread = false;
+    }
+};
+
+class ThreadedBinaryTree{
+
+    Node* root;
+
+    Node* insert(Node* curr, int val){
+        if(!curr){
+            return new Node(val);
+        } else if(val < curr->value){
+            curr->left = insert(curr->left, val);
+        } else {
+            curr->right = insert(curr->right, val);
+        }
+
+        return curr;
+    }
+
+    Node* leftMost(Node* root){
+        while(root && root->left){
+            root = root->left;
+        }
+
+        return root;
+    }
+
+    void createThreaded(Node* node, Node* &prev){
+        if(!node) return;
+
+        createThreaded(node->left, prev);
+
+        if(prev != NULL && prev->right == NULL){
+            prev->right = node;
+            prev->rightThread = true;
+        }
+
+        prev = node;
+
+        if(!node->rightThread){
+            createThreaded(node->right, prev);
+        }
+    }
+
+    public:
+        ThreadedBinaryTree(){
+            root = NULL;
+        }
+
+        void insert(int val){
+            root = insert(root, val);
+        }
+
+        void convertToThreaded(){
+            Node* prev = NULL;
+            createThreaded(root, prev);
+        }
+
+        void inorder(){
+            Node* curr = leftMost(root);
+
+            while(curr != NULL){
+                cout << curr->value << " ";
+                if(curr->rightThread){
+                    curr = curr->right;
+                } else {
+                    curr = leftMost(curr->right);
+                }
+            }
+        }
+};
+
+int main(){
+
+    ThreadedBinaryTree tbt;
+
+    cout << "Enter number of nodes: ";
+    int n;
+    cin >> n;
+
+    for(int i=0;i<n;i++){
+        cout << "Enter value: ";
+        int val;
+        cin >> val;
+        tbt.insert(val);
+    }
+
+    tbt.convertToThreaded();
+    tbt.inorder();
+}
